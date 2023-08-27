@@ -327,10 +327,10 @@ jobs:
           command: |
             if curl "${API_URL}/api/status" | grep "ok"
             then
-    				  return 0
+              exit 0
             else
-    				  return 1
-            fi
+              exit 1
+            fi       
       - run:
           name: Frontend smoke test.
           command: |

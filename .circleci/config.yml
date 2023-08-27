@@ -162,7 +162,7 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - deploy-infrastructure     
+      - destroy-infrastructure     
 
   #configure-infrastructure:
    # docker:

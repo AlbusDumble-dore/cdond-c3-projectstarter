@@ -162,24 +162,24 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment     
-
+      - destroy-environment   
+      
   configure-infrastructure:
-      docker:
+    docker:
       - image: python:3.7-alpine3.11
     steps:
-      - checkout
-      - add_ssh_keys:
+       - checkout
+       - add_ssh_keys:
             fingerprints: ["bb:8b:98:90:ad:4f:c2:2c:78:5b:c0:06:aa:8a:e4:d2"]
-      - attach_workspace:
+       - attach_workspace:
           at: ~/
-      - run:
+       - run:
           name: Install dependencies
           command: |
              apk add --update tar gzip ansible
              pip install awscli
         
-      - run:
+       - run:
           name: Configure server
           command: |
             cat ./.circleci/ansible/inventory.txt
@@ -198,7 +198,7 @@ jobs:
             cat backend/.env         
             cd .circleci/ansible
             ansible-playbook -i inventory.txt configure-server.yml -v 
-      - destroy-environment      
+       - destroy-environment      
 
   #run-migrations:
    # docker:

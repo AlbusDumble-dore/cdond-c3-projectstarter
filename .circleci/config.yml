@@ -164,24 +164,41 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment     
 
-  #configure-infrastructure:
-   # docker:
-      # Docker image here that supports Ansible
-    #steps:
-      # Checkout code from git
-      # Add ssh keys with fingerprint
-      # attach workspace
-     # - run:
-      #    name: Install dependencies
-       #   command: |
-            # Your code here
-        #    exit 1
-      #- run:
-       #   name: Configure server
-        #  command: |
-            # Your code here
-         #   exit 1
-      # Here's where you will add some code to rollback on failure      
+  configure-infrastructure:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+       - checkout
+       -  add_ssh_keys:
+            fingerprints: ["bb:8b:98:90:ad:4f:c2:2c:78:5b:c0:06:aa:8a:e4:d2"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+             apk add --update tar gzip ansible
+             pip install awscli
+        
+      - run:
+          name: Configure server
+          command: |
+            cat ./.circleci/ansible/inventory.txt
+            export ANSIBLE_HOST_KEY_CHECKING=False
+            export RECORD_HOST_KEYS=False
+            export ANSIBLE_PARAMIKO_BANNER_TIMEOUT=30   
+            echo ENVIROMENT=production > "backend/.env"      
+            echo TYPEORM_CONNECTION=postgres >> "backend/.env"
+            echo TYPEORM_MIGRATIONS_DIR=./src/migrations >> "backend/.env"
+            echo TYPEORM_ENTITIES=./src/modules/domain/**/*.entity.ts >> "backend/.env"          
+            echo TYPEORM_PORT=$TYPEORM_PORT >> "backend/.env"      
+            echo TYPEORM_USERNAME=$TYPEORM_USERNAME >> "backend/.env"            
+            echo TYPEORM_PASSWORD=$TYPEORM_PASSWORD >> "backend/.env"      
+            echo TYPEORM_DATABASE=$TYPEORM_DATABASE >> "backend/.env"     
+            echo "CONTENT OF backend/.env"      
+            cat backend/.env         
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt configure-server.yml -v 
+      - destroy-environment      
 
   #run-migrations:
    # docker:
@@ -314,8 +331,8 @@ workflows:
           filters:
             branches:
               only: [master]
-      #- configure-infrastructure:
-       #   requires: [deploy-infrastructure]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       #- run-migrations:
        #   requires: [configure-infrastructure]
       #- deploy-frontend:

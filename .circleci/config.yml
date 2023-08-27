@@ -306,14 +306,14 @@ jobs:
     docker:
       - image: cimg/node:13.8.0
     steps:
-      - checkout
-      - run:
+       - checkout
+       - run:
           name: Install dependencies
           command: |
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
             sudo ./aws/install
-      - run:
+       - run:
           name: Get backend url
           command: |
             export BACKEND_PUBLIC_IP=$(aws --region us-east-1 ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query 'Reservations[*].Instances[*].PublicDnsName' --output text)
@@ -322,7 +322,7 @@ jobs:
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
             
-      - run:
+       - run:
           name: Backend smoke test.
           command: |
             if curl "${API_URL}/api/status" | grep "ok"
@@ -331,7 +331,7 @@ jobs:
             else
               exit 1
             fi       
-      - run:
+       - run:
           name: Frontend smoke test.
           command: |
             URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            

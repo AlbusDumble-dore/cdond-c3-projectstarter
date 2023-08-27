@@ -206,40 +206,40 @@ jobs:
     docker:
       - image: circleci/node:13.8.
     steps:
-      - checkout
-      - run:
+       - checkout
+       - run:
           name: Run migrations
           command: |
-             cd backend
-             npm install
-             ## Run and save the migration output
-             npm run migrations > migrations_dump.txt
+            cd backend
+            npm install
+            ## Run and save the migration output
+            npm run migrations > migrations_dump.txt
             
-      - run:
+       - run:
           name: Send migration results to memstash
           command: |
-             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
-             then
+            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            then
                  # If you are using memstash.io, generate the token "7933fe63-4687-4fa1-8426-aa25aa1730ec" on the website
                  # curl -H "Content-Type: text/plain" -H "token: 7933fe63-4687-4fa1-8426-aa25aa1730ec" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
                  # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
-                 curl https://kvdb.io/2bceCQdoNVsUXsVDtNGbLd/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
-             fi
+              curl https://kvdb.io/2bceCQdoNVsUXsVDtNGbLd/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
+            fi
        - destroy-environment
        - revert-migrations
        
   deploy-frontend:
     docker:
-       - image: amazon/aws-cli
+      - image: amazon/aws-cli
     steps:
-          - checkout
-          - run:
+       - checkout
+       - run:
           name: Install dependencies
           command: |
              yum install -y tar gzip curl
              curl -sL https://rpm.nodesource.com/setup_10.x | bash -
              yum install -y nodejs
-      - run:
+       - run:
           name: Get backend url
           command: |
             export BACKEND_PUBLIC_IP=$(aws --region us-east-1 ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query 'Reservations[*].Instances[*].PublicDnsName' --output text)
@@ -248,12 +248,12 @@ jobs:
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
             cat frontend/.env
             
-      - persist_to_workspace:
+       - persist_to_workspace:
           root: ~/
           paths:
             - project/frontend/.env
             
-      - run:
+       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
@@ -273,7 +273,7 @@ jobs:
             fingerprints: ["bb:8b:98:90:ad:4f:c2:2c:78:5b:c0:06:aa:8a:e4:d2"]
        - attach_workspace:
           at: ~/
-      - run:
+       - run:
           name: Install dependencies
           command: |
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
@@ -283,7 +283,7 @@ jobs:
             sudo apt install software-properties-common -y
             sudo add-apt-repository --yes --update ppa:ansible/ansible
             sudo apt install ansible -y            
-      - run:
+       - run:
           name: Deploy backend
           command: |
              cd backend
